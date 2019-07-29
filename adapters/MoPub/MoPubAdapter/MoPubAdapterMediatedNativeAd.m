@@ -114,9 +114,11 @@
 #pragma GCC diagnostic ignored "-Wundeclared-selector"
 
 - (void)didRenderInView:(UIView *)view
-    clickableAssetViews:(NSDictionary<GADUnifiedNativeAssetIdentifier,UIView *> *)clickableAssetViews
- nonclickableAssetViews:(NSDictionary<GADUnifiedNativeAssetIdentifier,UIView *> *)nonclickableAssetViews
-         viewController:(UIViewController *)viewController {
+       clickableAssetViews:
+           (NSDictionary<GADUnifiedNativeAssetIdentifier, UIView *> *)clickableAssetViews
+    nonclickableAssetViews:
+        (NSDictionary<GADUnifiedNativeAssetIdentifier, UIView *> *)nonclickableAssetViews
+            viewController:(UIViewController *)viewController {
   _baseViewController = viewController;
   if ([_nativeAd respondsToSelector:@selector(willAttachToView:withAdContentViews:)]) {
     [_nativeAd performSelector:@selector(willAttachToView:withAdContentViews:)

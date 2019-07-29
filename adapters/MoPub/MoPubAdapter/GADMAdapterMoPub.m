@@ -197,50 +197,30 @@ static NSMapTable *interstitialAdapterDelegates;
 
 #pragma mark - Banner Ads
 
-/// Find closest supported ad size from a given ad size.
-/// Returns nil if no supported size matches.
-- (CGSize)GADSupportedAdSizeFromRequestedSize:(GADAdSize)gadAdSize {
-  GADAdSize banner = GADAdSizeFromCGSize(CGSizeMake(320, 50));
-  GADAdSize mRect = GADAdSizeFromCGSize(CGSizeMake(300, 250));
-  GADAdSize leaderboard = GADAdSizeFromCGSize(CGSizeMake(728, 90));
-  NSArray *potentials = @[
-    NSValueFromGADAdSize(banner), NSValueFromGADAdSize(mRect), NSValueFromGADAdSize(leaderboard)
-  ];
-  GADAdSize closestSize = GADClosestValidSizeForAdSizes(gadAdSize, potentials);
-  if (IsGADAdSizeValid(closestSize)) {
-    return CGSizeFromGADAdSize(closestSize);
-  }
-
-  MPLogDebug(@"Unable to retrieve supported size from GADAdSize: %@",
-             NSStringFromGADAdSize(gadAdSize));
-
-  return CGSizeZero;
-}
-
 - (void)getBannerWithSize:(GADAdSize)adSize {
-  CGSize supportedSize = [self GADSupportedAdSizeFromRequestedSize:adSize];
   id<GADMAdNetworkConnector> strongConnector = _connector;
   NSString *publisherID = strongConnector.credentials[kGADMAdapterMoPubPubIdKey];
 
   CLLocation *currentlocation = [[CLLocation alloc] initWithLatitude:strongConnector.userLatitude
                                                            longitude:strongConnector.userLongitude];
 
-  _bannerAd = [[MPAdView alloc] initWithAdUnitId:publisherID size:supportedSize];
+  _bannerAd = [[MPAdView alloc] initWithAdUnitId:publisherID];
   _bannerAd.delegate = self;
   _bannerAd.keywords = [self getKeywords:false];
   _bannerAd.userDataKeywords = [self getKeywords:true];
   _bannerAd.location = currentlocation;
 
   MPLogDebug(@"Requesting Banner Ad from MoPub Ad Network.");
-  [[GADMAdapterMoPubSingleton sharedInstance] initializeMoPubSDKWithAdUnitID:publisherID
-                                                           completionHandler:^{
-                                                             [self.bannerAd loadAd];
-                                                           }];
+  [[GADMAdapterMoPubSingleton sharedInstance]
+      initializeMoPubSDKWithAdUnitID:publisherID
+                   completionHandler:^{
+                     [self.bannerAd loadAdWithMaxAdSize:adSize.size];
+                   }];
 }
 
 #pragma mark MoPub Ads View delegate methods
 
-- (void)adViewDidLoadAd:(MPAdView *)view {
+- (void)adViewDidLoadAd:(MPAdView *)view adSize:(CGSize)adSize {
   [_connector adapter:self didReceiveAdView:view];
 }
 
