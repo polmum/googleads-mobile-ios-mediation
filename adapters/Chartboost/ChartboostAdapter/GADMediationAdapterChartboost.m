@@ -20,13 +20,9 @@
 #import "GADMChartboostExtras.h"
 #import "GADMRewardedAdChartboost.h"
 
-@interface GADMediationAdapterChartboost ()
-
-@property(nonatomic, strong) GADMRewardedAdChartboost *rewardedAd;
-
-@end
-
-@implementation GADMediationAdapterChartboost
+@implementation GADMediationAdapterChartboost {
+  GADMRewardedAdChartboost *_rewardedAd;
+}
 
 + (void)setUpWithConfiguration:(GADMediationServerConfiguration *)configuration
              completionHandler:(GADMediationAdapterSetUpCompletionBlock)completionHandler {
@@ -101,9 +97,9 @@
 - (void)loadRewardedAdForAdConfiguration:(GADMediationRewardedAdConfiguration *)adConfiguration
                        completionHandler:
                            (GADMediationRewardedLoadCompletionHandler)completionHandler {
-  self.rewardedAd = [[GADMRewardedAdChartboost alloc] init];
-  [self.rewardedAd loadRewardedAdForAdConfiguration:adConfiguration
-                                  completionHandler:completionHandler];
+  _rewardedAd = [[GADMRewardedAdChartboost alloc] init];
+  [_rewardedAd loadRewardedAdForAdConfiguration:adConfiguration
+                              completionHandler:completionHandler];
 }
 
 @end

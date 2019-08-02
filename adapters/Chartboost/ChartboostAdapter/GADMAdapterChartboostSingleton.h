@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@import Foundation;
-@import GoogleMobileAds;
-
+#import <Foundation/Foundation.h>
+#import <GoogleMobileAds/GoogleMobileAds.h>
 #import "GADMAdapterChartboost.h"
 
 typedef enum { INITIALIZED, INITIALIZING, UNINITIALIZED } ChartboostInitState;
@@ -28,6 +27,7 @@ typedef void (^ChartboostInitCompletionHandler)(NSError *_Nullable error);
 /// Shared instance.
 + (instancetype)sharedManager;
 
+/// Initializes Chartboost SDK.
 - (void)startWithAppId:(NSString *)appId
           appSignature:(NSString *)appSignature
      completionHandler:(ChartboostInitCompletionHandler)completionHandler;
@@ -42,11 +42,9 @@ typedef void (^ChartboostInitCompletionHandler)(NSError *_Nullable error);
 - (void)presentRewardedAdForDelegate:
     (id<GADMAdapterChartboostDataProvider, ChartboostDelegate>)adapterDelegate;
 
-/// Initializes a new interstitial ad instance with |appID|, |appSignature| and |adapterDelegate|.
-- (void)configureInterstitialAdWithAppID:(NSString *)appID
-                            appSignature:(NSString *)appSignature
-                                delegate:(id<GADMAdapterChartboostDataProvider, ChartboostDelegate>)
-                                             adapterDelegate;
+/// Initializes a new interstitial ad instance.
+- (void)configureInterstitialAdWithDelegate:
+    (id<GADMAdapterChartboostDataProvider, ChartboostDelegate>)adapterDelegate;
 
 /// Presents the current interstitial ad for |adapterDelegate|.
 - (void)presentInterstitialAdForDelegate:

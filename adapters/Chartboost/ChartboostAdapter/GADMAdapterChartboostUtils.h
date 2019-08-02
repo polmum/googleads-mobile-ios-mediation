@@ -14,6 +14,7 @@
 
 #import <Foundation/Foundation.h>
 
+/// Sets |value| for |key| in |dictionary| if |value| is not nil.
 void GADMAdapterChartboostMutableDictionarySetObjectForKey(NSMutableDictionary *_Nonnull dictionary,
                                                            id<NSCopying> _Nullable key,
                                                            id _Nullable value);

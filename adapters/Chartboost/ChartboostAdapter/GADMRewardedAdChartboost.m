@@ -14,28 +14,42 @@
 
 #import "GADMRewardedAdChartboost.h"
 #import <Chartboost/Chartboost.h>
+#include <stdatomic.h>
 #import "GADMAdapterChartboostConstants.h"
 #import "GADMAdapterChartboostSingleton.h"
 #import "GADMChartboostError.h"
 
 @interface GADMRewardedAdChartboost () <GADMAdapterChartboostDataProvider, ChartboostDelegate>
-
-@property(nonatomic, weak) GADMediationRewardedAdConfiguration *adConfig;
-@property(nonatomic, copy) GADMediationRewardedLoadCompletionHandler completionHandler;
-@property(nonatomic, weak) id<GADMediationRewardedAdEventDelegate> adEventDelegate;
-@property(nonatomic, copy) NSString *chartboostAdLocation;
-/// YES if the adapter is loading.
-@property(nonatomic, assign) BOOL loading;
-
 @end
 
-@implementation GADMRewardedAdChartboost
+@implementation GADMRewardedAdChartboost {
+  GADMediationRewardedAdConfiguration *_adConfig;
+  GADMediationRewardedLoadCompletionHandler _completionHandler;
+  id<GADMediationRewardedAdEventDelegate> _adEventDelegate;
+  NSString *_chartboostAdLocation;
+  /// YES if the adapter is loading.
+  BOOL _loading;
+}
 
 - (void)loadRewardedAdForAdConfiguration:(GADMediationRewardedAdConfiguration *)adConfiguration
                        completionHandler:
                            (GADMediationRewardedLoadCompletionHandler)completionHandler {
-  self.adConfig = adConfiguration;
-  self.completionHandler = completionHandler;
+  _adConfig = adConfiguration;
+  __block atomic_flag completionHandlerCalled = ATOMIC_FLAG_INIT;
+  __block GADMediationRewardedLoadCompletionHandler originalCompletionHandler =
+      [completionHandler copy];
+  _completionHandler = ^id<GADMediationRewardedAdEventDelegate>(id<GADMediationRewardedAd> bannerAd,
+                                                                NSError *error) {
+    if (atomic_flag_test_and_set(&completionHandlerCalled)) {
+      return nil;
+    }
+    id<GADMediationRewardedAdEventDelegate> delegate = nil;
+    if (originalCompletionHandler) {
+      delegate = originalCompletionHandler(bannerAd, error);
+    }
+    originalCompletionHandler = nil;
+    return delegate;
+  };
 
   NSString *appID = [adConfiguration.credentials.settings[kGADMAdapterChartboostAppID]
       stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -46,7 +60,7 @@
 
   if (!appID || !appSignature) {
     NSError *error = GADChartboostErrorWithDescription(@"App ID & App Signature cannot be nil.");
-    self.completionHandler(nil, error);
+    _completionHandler(nil, error);
     return;
   }
 
@@ -81,18 +95,18 @@
 }
 
 - (GADMChartboostExtras *)extras {
-  GADMChartboostExtras *chartboostExtras = [self.adConfig extras];
+  GADMChartboostExtras *chartboostExtras = [_adConfig extras];
   return chartboostExtras;
 }
 
 - (void)didFailToLoadAdWithError:(NSError *)error {
-  self.completionHandler(nil, error);
+  _completionHandler(nil, error);
 }
 
 #pragma mark - Chartboost Reward Based Video Ad Delegate Methods
 
 - (void)didDisplayRewardedVideo:(CBLocation)location {
-  id<GADMediationRewardedAdEventDelegate> strongDelegate = self.adEventDelegate;
+  id<GADMediationRewardedAdEventDelegate> strongDelegate = _adEventDelegate;
   [strongDelegate willPresentFullScreenView];
   [strongDelegate reportImpression];
   [strongDelegate didStartVideo];
@@ -100,34 +114,34 @@
 
 - (void)didCacheRewardedVideo:(CBLocation)location {
   if (_loading) {
-    self.adEventDelegate = self.completionHandler(self, nil);
+    _adEventDelegate = _completionHandler(self, nil);
     _loading = NO;
   }
 }
 
 - (void)didFailToLoadRewardedVideo:(CBLocation)location withError:(CBLoadError)error {
   if (_loading) {
-    self.completionHandler(nil, adRequestErrorTypeForCBLoadError(error));
+    _completionHandler(nil, adRequestErrorTypeForCBLoadError(error));
     _loading = NO;
   } else if (error == CBLoadErrorInternetUnavailableAtShow) {
     // Chartboost sends the CBLoadErrorInternetUnavailableAtShow error when the Chartboost SDK
     // fails to present an ad for which a didCacheRewardedVideo event has already been sent.
-    [self.adEventDelegate didFailToPresentWithError:adRequestErrorTypeForCBLoadError(error)];
+    [_adEventDelegate didFailToPresentWithError:adRequestErrorTypeForCBLoadError(error)];
   }
 }
 
 - (void)didDismissRewardedVideo:(CBLocation)location {
-  [self.adEventDelegate didDismissFullScreenView];
+  [_adEventDelegate didDismissFullScreenView];
 }
 
 - (void)didClickRewardedVideo:(CBLocation)location {
-  id<GADMediationRewardedAdEventDelegate> strongDelegate = self.adEventDelegate;
+  id<GADMediationRewardedAdEventDelegate> strongDelegate = _adEventDelegate;
   [strongDelegate reportClick];
   [strongDelegate willDismissFullScreenView];
 }
 
 - (void)didCompleteRewardedVideo:(CBLocation)location withReward:(int)reward {
-  id<GADMediationRewardedAdEventDelegate> strongDelegate = self.adEventDelegate;
+  id<GADMediationRewardedAdEventDelegate> strongDelegate = _adEventDelegate;
   [strongDelegate didEndVideo];
   /// Chartboost doesn't provide access to the reward type.
   GADAdReward *adReward =

@@ -18,7 +18,11 @@
 #import "GADMAdapterChartboostDataProvider.h"
 #import "GADMChartboostError.h"
 
-@interface GADMAdapterChartboostSingleton () <ChartboostDelegate> {
+@interface GADMAdapterChartboostSingleton () <ChartboostDelegate>
+
+@end
+
+@implementation GADMAdapterChartboostSingleton {
   /// Hash Map to hold all interstitial adapter delegates.
   NSMapTable<NSString *, id<GADMAdapterChartboostDataProvider, ChartboostDelegate>>
       *_interstitialAdapterDelegates;
@@ -34,10 +38,6 @@
 
   NSMutableArray<ChartboostInitCompletionHandler> *_completionHandlers;
 }
-
-@end
-
-@implementation GADMAdapterChartboostSingleton
 
 #pragma mark - Singleton Initializers
 
@@ -69,21 +69,23 @@
 - (void)startWithAppId:(NSString *)appId
           appSignature:(NSString *)appSignature
      completionHandler:(ChartboostInitCompletionHandler)completionHandler {
-  if (_initState == INITIALIZED) {
-    completionHandler(nil);
-    return;
-  }
+  @synchronized(self) {
+    if (_initState == INITIALIZED) {
+      completionHandler(nil);
+      return;
+    }
 
-  static dispatch_once_t once;
-  dispatch_once(&once, ^{
-    [Chartboost startWithAppId:appId appSignature:appSignature delegate:self];
-    [Chartboost setMediation:CBMediationAdMob
-          withLibraryVersion:[GADRequest sdkVersion]
-              adapterVersion:kGADMAdapterChartboostVersion];
-    [Chartboost setAutoCacheAds:YES];
-  });
-  _initState = INITIALIZING;
-  [_completionHandlers addObject:completionHandler];
+    [_completionHandlers addObject:completionHandler];
+
+    if (_initState != INITIALIZING) {
+      _initState = INITIALIZING;
+      [Chartboost startWithAppId:appId appSignature:appSignature delegate:self];
+      [Chartboost setMediation:CBMediationAdMob
+            withLibraryVersion:[GADRequest sdkVersion]
+                adapterVersion:kGADMAdapterChartboostVersion];
+      [Chartboost setAutoCacheAds:YES];
+    }
+  }
 }
 
 - (void)addRewardedAdAdapterDelegate:
@@ -168,10 +170,8 @@
 
 #pragma mark - Interstitial methods
 
-- (void)configureInterstitialAdWithAppID:(NSString *)appID
-                            appSignature:(NSString *)appSignature
-                                delegate:(id<GADMAdapterChartboostDataProvider, ChartboostDelegate>)
-                                             adapterDelegate {
+- (void)configureInterstitialAdWithDelegate:
+    (id<GADMAdapterChartboostDataProvider, ChartboostDelegate>)adapterDelegate {
   GADMChartboostExtras *chartboostExtras = [adapterDelegate extras];
   if (chartboostExtras.frameworkVersion && chartboostExtras.framework) {
     [Chartboost setFramework:chartboostExtras.framework
@@ -203,7 +203,7 @@
   [Chartboost showInterstitial:[adapterDelegate getAdLocation]];
 }
 
-#pragma mark - Chartboost Delegate mathods -
+#pragma mark - Chartboost Delegate mathods
 
 - (void)didInitialize:(BOOL)status {
   if (status) {
