@@ -263,6 +263,10 @@
     [adapterDelegate unityAdsReady:placementID];
   }
 
+  @synchronized(_adapterDelegates) {
+    GADMAdapterUnityMapTableRemoveObjectForKey(_adapterDelegates, placementID);
+  }
+
   if (_isBannerLoading && [placementID isEqualToString:_bannerPlacementID]) {
     [UnityAdsBanner setDelegate:self];
     [UnityAdsBanner loadBanner:_bannerPlacementID];
