@@ -25,7 +25,6 @@
 
 /// Configures a reward-based video ad with provided |gameID| and |adapterDelegate| and returns
 /// YES if successful; otherwise returns NO.
-
 - (void)initializeWithGameID:(NSString *)gameID;
 
 /// Requests a reward-based video ad with |adapterDelegate|.
@@ -46,11 +45,6 @@
 - (void)presentInterstitialAdForViewController:(UIViewController *)viewController
                                       delegate:(id<GADMAdapterUnityDataProvider,
                                                    UnityAdsExtendedDelegate>)adapterDelegate;
-
-/// Requests a banner ad for |gameID| with |adapterDelegate|
-- (void)requestBannerAdWithGameID:(NSString *)gameID
-                         delegate:(id<GADMAdapterUnityDataProvider, UnityAdsBannerDelegate>)
-                                      adapterDelegate;
 
 /// Tells the adapter to remove itself as a |adapterDelegate|.
 - (void)stopTrackingDelegate:

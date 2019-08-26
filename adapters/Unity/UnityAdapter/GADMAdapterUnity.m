@@ -26,6 +26,9 @@
   /// The Requested Banner Ad size.
   GADAdSize _requestedAdSize;
 
+  /// Unity Ads banner ad view object
+  UADSBannerAdView *_bannerView;
+
   /// Game ID of Unity Ads network.
   NSString *_gameID;
 
@@ -34,9 +37,6 @@
 
   /// YES if the adapter is loading.
   BOOL _isLoading;
-
-  /// YES if a UnityAds Banner has loaded.
-  BOOL _bannerDidLoad;
 }
 
 @end
@@ -117,8 +117,13 @@
     return;
   }
 
-  _bannerDidLoad = NO;
-  [[GADMAdapterUnitySingleton sharedInstance] requestBannerAdWithGameID:_gameID delegate:self];
+  /// Calling this just in case Unity Ads is not inititalized, otherwise it does nothing
+  [[GADMAdapterUnitySingleton sharedInstance] initializeWithGameID:_gameID];
+
+  ///Request a banner ad - on success, returns a view inside |unityAdsBannerDidLoad:|
+  _bannerView = [[UADSBannerAdView alloc]initWithPlacementId:_placementID size:adSize.size];
+  [_bannerView setDelegate:self];
+  [_bannerView load];
 }
 
 - (BOOL)isBannerAnimationOK:(GADMBannerAnimationType)animType {
@@ -211,7 +216,15 @@
 
 #pragma mark - Unity Banner Delegate Methods
 
-- (void)unityAdsBannerDidClick:(nonnull NSString *)placementId {
+- (void)unityAdsBannerDidNoFill:(UADSBannerAdView *)bannerAdView {
+  id<GADMAdNetworkConnector> strongNetworkConnector = _networkConnector;
+  if (strongNetworkConnector) {
+    NSError *error = GADUnityErrorWithDescription(@"Unity Ads Banner returned no fill");
+    [strongNetworkConnector adapter:self didFailAd:error];
+  }
+}
+
+- (void)unityAdsBannerDidClick:(UADSBannerAdView *)bannerAdView {
   id<GADMAdNetworkConnector> strongNetworkConnector = _networkConnector;
   if (strongNetworkConnector) {
     [strongNetworkConnector adapterDidGetAdClick:self];
@@ -219,7 +232,7 @@
   }
 }
 
-- (void)unityAdsBannerDidError:(nonnull NSString *)message {
+- (void)unityAdsBannerDidError:(UADSBannerAdView *)bannerAdView message:(NSString *)message {
   id<GADMAdNetworkConnector> strongNetworkConnector = _networkConnector;
   if (strongNetworkConnector) {
     NSError *error = GADUnityErrorWithDescription(@"Unity Ads Banner internal error");
@@ -227,24 +240,24 @@
   }
 }
 
-- (void)unityAdsBannerDidHide:(nonnull NSString *)placementId {
-  NSLog(@"Unity Ads Banner did hide.");
+- (void)unityAdsBannerDidHide:(UADSBannerAdView *)bannerAdView {
+  NSLog(@"Unity Ads Banner did hide placement [ %@ ]", bannerAdView.placementId);
 }
 
-- (void)unityAdsBannerDidLoad:(nonnull NSString *)placementId view:(nonnull UIView *)view {
+- (void)unityAdsBannerDidLoad:(UADSBannerAdView *)bannerAdView {
+  NSLog(@"Unity Ads Banner did load placement [ %@ ]", bannerAdView.placementId);
   id<GADMAdNetworkConnector> strongNetworkConnector = _networkConnector;
 
   if (strongNetworkConnector) {
     // To support flexible ad sizes, we need to verify if the returned Banner ad fits in the
     // ad size we requested, and fail the ad request if it doesn't.
     GADAdSize unityBannerSize =
-        GADAdSizeFromCGSize(CGSizeMake(view.frame.size.width, view.frame.size.height));
+        GADAdSizeFromCGSize(CGSizeMake(bannerAdView.frame.size.width, bannerAdView.frame.size.height));
     GADAdSize closestSize =
         GADClosestValidSizeForAdSizes(unityBannerSize, @[ NSValueFromGADAdSize(_requestedAdSize) ]);
 
     if (IsGADAdSizeValid(closestSize)) {
-      _bannerDidLoad = YES;
-      [strongNetworkConnector adapter:self didReceiveAdView:view];
+      [strongNetworkConnector adapter:self didReceiveAdView:bannerAdView];
     } else {
       NSString *errorDescription = [NSString
           stringWithFormat:@"The banner size loaded (%@) is not valid for the requested size (%@).",
@@ -259,12 +272,12 @@
   }
 }
 
-- (void)unityAdsBannerDidShow:(nonnull NSString *)placementId {
-  NSLog(@"Unity Ads Banner is showing.");
+- (void)unityAdsBannerDidShow:(UADSBannerAdView *)bannerAdView {
+  NSLog(@"Unity Ads Banner is showing placement [ %@ ]", bannerAdView.placementId);
 }
 
-- (void)unityAdsBannerDidUnload:(nonnull NSString *)placementId {
-  NSLog(@"Unity Ads Banner has unloaded.");
+- (void)unityAdsBannerDidUnload:(UADSBannerAdView *)bannerAdView {
+  NSLog(@"Unity Ads Banner has unloaded placement [ %@ ]", bannerAdView.placementId);
 }
 
 @end

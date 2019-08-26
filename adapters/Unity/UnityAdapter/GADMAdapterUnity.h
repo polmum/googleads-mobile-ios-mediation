@@ -24,6 +24,6 @@
 @interface GADMAdapterUnity : NSObject <GADMAdNetworkAdapter,
                                         GADMAdapterUnityDataProvider,
                                         UnityAdsExtendedDelegate,
-                                        UnityAdsBannerDelegate>
+                                        UADSBannerAdViewDelegate>
 
 @end
