@@ -18,7 +18,10 @@
 
 @interface GADMAdapterUnitySingleton () <UnityAdsExtendedDelegate, UnityAdsBannerDelegate> {
   /// Array to hold all adapter delegates.
-  NSMapTable *_adapterDelegates;
+  NSMutableDictionary *_adapterDelegates;
+    
+//add a table to store placement statement change
+  NSMutableDictionary *_statementChanges;
 
   NSString *_bannerPlacementID;
   BOOL _isBannerLoading;
@@ -49,8 +52,8 @@
 - (id)init {
   self = [super init];
   if (self) {
-    _adapterDelegates = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
-                                              valueOptions:NSMapTableWeakMemory];
+    _adapterDelegates = [[NSMutableDictionary alloc] init];
+    _statementChanges = [[NSMutableDictionary alloc] init];
   }
   return self;
 }
@@ -68,7 +71,7 @@
   [mediationMetaData commit];
 
   // Initializing Unity Ads with |gameID|.
-  [UnityAds initialize:gameID delegate:self testMode:false enablePerPlacementLoad:true];
+  [UnityAds initialize:@"3238965" delegate:self testMode:false enablePerPlacementLoad:true];
 }
 
 - (void)addAdapterDelegate:
@@ -101,9 +104,31 @@
   }
 
   [UnityAds load:placementID];
-  if ([UnityAds isReady:placementID]) {
-    [adapterDelegate unityAdsReady:placementID];
-  }
+   
+    NSNumber *numberStates = [_statementChanges valueForKey:placementID];
+    if (numberStates) {
+        switch ([numberStates integerValue]) {
+            case kPlacementContentStateReady:
+                [adapterDelegate unityAdsReady:placementID];
+                break;
+            case kPlacementContentStateNoFill:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads nofill for placement: %@", placementID]];
+                break;
+            case kPlacementContentStateWaiting:
+                break;
+            case kPlacementContentStateDisabled:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads disabled for placement: %@", placementID]];
+                break;
+            case kPlacementContentStateNotAvailable:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads not available for placement: %@", placementID]];
+                break;
+            default:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads cannot be loaded for placement: %@", placementID]];
+                break;
+        }
+        
+        [_statementChanges removeObjectForKey:placementID];
+    }
 }
 
 - (void)presentRewardedAdForViewController:(UIViewController *)viewController
@@ -148,9 +173,33 @@
   }
 
   [UnityAds load:placementID];
-  if ([UnityAds isReady:placementID]) {
-    [adapterDelegate unityAdsReady:placementID];
-  }
+
+    NSNumber *numberStates = [_statementChanges valueForKey:placementID];
+    if (numberStates) {
+        switch ([numberStates integerValue]) {
+            case kPlacementContentStateReady:
+                [adapterDelegate unityAdsReady:placementID];
+                break;
+            case kPlacementContentStateNoFill:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads nofill for placement: %@", placementID]];
+                break;
+            case kPlacementContentStateWaiting:
+                break;
+            case kPlacementContentStateDisabled:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads disabled for placement: %@", placementID]];
+                break;
+            case kPlacementContentStateNotAvailable:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads not available for placement: %@", placementID]];
+                break;
+            default:
+                [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads cannot be loaded for placement: %@", placementID]];
+                break;
+        }
+        
+        [_statementChanges removeObjectForKey:placementID];
+    }
+    
+    
 }
 
 - (void)presentInterstitialAdForViewController:(UIViewController *)viewController
@@ -239,6 +288,11 @@
 - (void)unityAdsPlacementStateChanged:(NSString *)placementId
                              oldState:(UnityAdsPlacementState)oldState
                              newState:(UnityAdsPlacementState)newState {
+    NSLog(@"PlacementStateChanged for placement %@ from old %ld to new %ld ", placementId, (long)oldState, (long)newState);
+    
+    if (newState != oldState) {
+         [_statementChanges setValue:[NSNumber numberWithInteger:newState] forKey:placementId];
+    }
   // This callback is not forwarded to the adapter by the GADMAdapterUnitySingleton and the adapter
   // should use the unityAdsReady: and unityAdsDidError: callbacks to forward Unity Ads SDK state to
   // Google Mobile Ads SDK.
@@ -256,10 +310,12 @@
 }
 
 - (void)unityAdsReady:(NSString *)placementID {
-  id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
+  id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate = [_adapterDelegates valueForKey:placementID];
+    // = [_adapterDelegates valueForKey:placementID]
   @synchronized(_adapterDelegates) {
     GADMAdapterUnityMapTableRemoveObjectForKey(_adapterDelegates, placementID);
   }
+    NSLog(@"adater delegate: %@", adapterDelegate);
 
   if (adapterDelegate) {
     [adapterDelegate unityAdsReady:placementID];
