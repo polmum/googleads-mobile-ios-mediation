@@ -71,7 +71,7 @@
   [mediationMetaData commit];
 
   // Initializing Unity Ads with |gameID|.
-  [UnityAds initialize:@"3238965" delegate:self testMode:false enablePerPlacementLoad:true];
+  [UnityAds initialize:gameID delegate:self testMode:false enablePerPlacementLoad:true];
 }
 
 - (void)addAdapterDelegate:
