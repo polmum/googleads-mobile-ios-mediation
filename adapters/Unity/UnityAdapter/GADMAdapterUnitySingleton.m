@@ -41,7 +41,7 @@
 
 @implementation GADMAdapterUnitySingleton
 
-+(instancetype)sharedInstance {
++ (instancetype)sharedInstance {
   static GADMAdapterUnitySingleton *sharedManager = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
@@ -50,9 +50,9 @@
   return sharedManager;
 }
 
--(id)init {
+- (id)init {
   self = [super init];
-  if (self) {
+  if(self) {
     _adapterDelegates = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
                                               valueOptions:NSMapTableWeakMemory];
     _placementStates = [[NSMutableDictionary alloc] init];
@@ -60,8 +60,8 @@
   return self;
 }
 
--(void)initializeWithGameID:(NSString *)gameID {
-  if ([UnityAds isInitialized]) {
+- (void)initializeWithGameID:(NSString *)gameID {
+  if([UnityAds isInitialized]) {
     return;
   }
 
@@ -76,8 +76,8 @@
   [UnityAds initialize:gameID delegate:self testMode:false enablePerPlacementLoad:true];
 }
 
--(void)addAdapterDelegate:
-        (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+- (void)addAdapterDelegate:
+    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   @synchronized (_adapterDelegates) {
     [_adapterDelegates setObject:adapterDelegate forKey:[adapterDelegate getPlacementID]];
   }
@@ -85,13 +85,13 @@
 
 #pragma mark - Rewardbased video ad methods
 
--(void)requestRewardedAdWithDelegate:
-        (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+- (void)requestRewardedAdWithDelegate:
+    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   NSString *gameID = [adapterDelegate getGameID];
   NSString *placementID = [adapterDelegate getPlacementID];
 
   @synchronized (_adapterDelegates) {
-    if ([_adapterDelegates objectForKey:placementID]) {
+    if([_adapterDelegates objectForKey:placementID]) {
       NSString *message = @"An ad is already loading for placement ID %@";
       [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError
                             withMessage:[NSString stringWithFormat:message, placementID]];
@@ -101,7 +101,7 @@
 
   [self addAdapterDelegate:adapterDelegate];
 
-  if (![UnityAds isInitialized]) {
+  if(![UnityAds isInitialized]) {
     [self initializeWithGameID:gameID];
   }
 
@@ -109,7 +109,7 @@
 
   @synchronized (_placementStates) {
     NSNumber *numberPlacementState = [_placementStates valueForKey:placementID];
-    if (numberPlacementState) {
+    if(numberPlacementState) {
       switch ([numberPlacementState integerValue]) {
         case kPlacementContentStateReady:
           [adapterDelegate unityAdsReady:placementID];
@@ -138,14 +138,14 @@
   }
 }
 
--(void)presentRewardedAdForViewController:(UIViewController *)viewController
-                                 delegate:
-                                         (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)
-                                         adapterDelegate {
+- (void)presentRewardedAdForViewController:(UIViewController *)viewController
+                                  delegate:
+                                      (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)
+                                      adapterDelegate {
   _currentShowingUnityDelegate = adapterDelegate;
 
   NSString *placementID = [adapterDelegate getPlacementID];
-  if ([UnityAds isReady:placementID]) {
+  if([UnityAds isReady:placementID]) {
     UADSMediationMetaData *mediationMetaData = [[UADSMediationMetaData alloc] init];
     [mediationMetaData setOrdinal:impressionOrdinal++];
     [mediationMetaData commit];
@@ -159,13 +159,13 @@
 
 #pragma mark - Interstitial ad methods
 
--(void)requestInterstitialAdWithDelegate:
-        (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+- (void)requestInterstitialAdWithDelegate:
+    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   NSString *gameID = [adapterDelegate getGameID];
   NSString *placementID = [adapterDelegate getPlacementID];
 
   @synchronized (_adapterDelegates) {
-    if ([_adapterDelegates objectForKey:placementID]) {
+    if([_adapterDelegates objectForKey:placementID]) {
       NSString *message = @"An ad is already loading for placement ID %@";
       [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError
                             withMessage:[NSString stringWithFormat:message, placementID]];
@@ -175,7 +175,7 @@
 
   [self addAdapterDelegate:adapterDelegate];
 
-  if (![UnityAds isInitialized]) {
+  if(![UnityAds isInitialized]) {
     [self initializeWithGameID:gameID];
   }
 
@@ -183,7 +183,7 @@
 
   @synchronized (_placementStates) {
     NSNumber *numberPlacementState = [_placementStates valueForKey:placementID];
-    if (numberPlacementState) {
+    if(numberPlacementState) {
       switch ([numberPlacementState integerValue]) {
         case kPlacementContentStateReady:
           [adapterDelegate unityAdsReady:placementID];
@@ -214,13 +214,13 @@
 
 }
 
--(void)presentInterstitialAdForViewController:(UIViewController *)viewController
-                                     delegate:(id <GADMAdapterUnityDataProvider,
-                                     UnityAdsExtendedDelegate>)adapterDelegate {
+- (void)presentInterstitialAdForViewController:(UIViewController *)viewController
+                                      delegate:(id <GADMAdapterUnityDataProvider,
+                                      UnityAdsExtendedDelegate>)adapterDelegate {
   _currentShowingUnityDelegate = adapterDelegate;
 
   NSString *placementID = [adapterDelegate getPlacementID];
-  if ([UnityAds isReady:placementID]) {
+  if([UnityAds isReady:placementID]) {
     UADSMediationMetaData *mediationMetaData = [[UADSMediationMetaData alloc] init];
     [mediationMetaData setOrdinal:impressionOrdinal++];
     [mediationMetaData commit];
@@ -234,22 +234,22 @@
 
 #pragma mark - Banner ad methods
 
--(void)requestBannerAdWithGameID:(NSString *)gameID
-                        delegate:(id <GADMAdapterUnityDataProvider, UnityAdsBannerDelegate>)
-                                adapterDelegate {
-  if (![UnityAds isSupported]) {
+- (void)requestBannerAdWithGameID:(NSString *)gameID
+                         delegate:(id <GADMAdapterUnityDataProvider, UnityAdsBannerDelegate>)
+                             adapterDelegate {
+  if(![UnityAds isSupported]) {
     [adapterDelegate unityAdsBannerDidError:@"Unity Ads is not supported for this device."];
     return;
   }
 
-  if (_isBannerLoading) {
+  if(_isBannerLoading) {
     [adapterDelegate
-            unityAdsBannerDidError:@"Only a maximum of one banner ad can be loaded from Unity Ads."];
+        unityAdsBannerDidError:@"Only a maximum of one banner ad can be loaded from Unity Ads."];
     return;
   }
 
   _bannerPlacementID = [adapterDelegate getPlacementID];
-  if (!_bannerPlacementID) {
+  if(!_bannerPlacementID) {
     [adapterDelegate unityAdsBannerDidError:@"Tried to request a banner with a nil placement ID"];
     return;
   }
@@ -258,7 +258,7 @@
   _isBannerLoading = YES;
 
   [UnityAdsBanner destroy];
-  if ([UnityAds isInitialized]) {
+  if([UnityAds isInitialized]) {
     [UnityAdsBanner setDelegate:self];
     [UnityAdsBanner loadBanner:_bannerPlacementID];
   } else {
@@ -268,28 +268,28 @@
 
 #pragma mark - Unity Banner Delegate Methods
 
--(void)unityAdsBannerDidLoad:(NSString *)placementId view:(UIView *)view {
+- (void)unityAdsBannerDidLoad:(NSString *)placementId view:(UIView *)view {
   [_currentBannerDelegate unityAdsBannerDidLoad:_bannerPlacementID view:view];
   _isBannerLoading = NO;
 }
 
--(void)unityAdsBannerDidUnload:(NSString *)placementId {
+- (void)unityAdsBannerDidUnload:(NSString *)placementId {
   [_currentBannerDelegate unityAdsBannerDidUnload:_bannerPlacementID];
 }
 
--(void)unityAdsBannerDidShow:(NSString *)placementId {
+- (void)unityAdsBannerDidShow:(NSString *)placementId {
   [_currentBannerDelegate unityAdsBannerDidShow:_bannerPlacementID];
 }
 
--(void)unityAdsBannerDidHide:(NSString *)placementId {
+- (void)unityAdsBannerDidHide:(NSString *)placementId {
   [_currentBannerDelegate unityAdsBannerDidHide:_bannerPlacementID];
 }
 
--(void)unityAdsBannerDidClick:(NSString *)placementId {
+- (void)unityAdsBannerDidClick:(NSString *)placementId {
   [_currentBannerDelegate unityAdsBannerDidClick:_bannerPlacementID];
 }
 
--(void)unityAdsBannerDidError:(NSString *)message {
+- (void)unityAdsBannerDidError:(NSString *)message {
   NSString *description = [[NSString alloc] initWithFormat:@"Internal Unity Ads banner error"];
   [_currentBannerDelegate unityAdsBannerDidError:description];
   _isBannerLoading = NO;
@@ -297,12 +297,12 @@
 
 #pragma mark - Unity Delegate Methods
 
--(void)unityAdsPlacementStateChanged:(NSString *)placementId
-                            oldState:(UnityAdsPlacementState)oldState
-                            newState:(UnityAdsPlacementState)newState {
+- (void)unityAdsPlacementStateChanged:(NSString *)placementId
+                             oldState:(UnityAdsPlacementState)oldState
+                             newState:(UnityAdsPlacementState)newState {
   NSLog(@"PlacementStateChanged for placement %@ from old %ld to new %ld ", placementId, (long) oldState, (long) newState);
 
-  if (newState != oldState) {
+  if(newState != oldState) {
     @synchronized (_placementStates) {
       [_placementStates setValue:[NSNumber numberWithInteger:newState] forKey:placementId];
     }
@@ -312,11 +312,11 @@
   @synchronized (_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementId];
   }
-  if ([placementId isEqualToString:@"video"]) {
+  if([placementId isEqualToString:@"video"]) {
     NSLog(@"PlacementState for video %ld with delegate %@", newState, adapterDelegate);
   }
 
-  if (adapterDelegate) {
+  if(adapterDelegate) {
     switch (newState) {
       case kPlacementContentStateReady:
         [adapterDelegate unityAdsReady:placementId];
@@ -343,29 +343,29 @@
   // Google Mobile Ads SDK.
 }
 
--(void)unityAdsDidFinish:(NSString *)placementID withFinishState:(UnityAdsFinishState)state {
+- (void)unityAdsDidFinish:(NSString *)placementID withFinishState:(UnityAdsFinishState)state {
   @synchronized (_adapterDelegates) {
     GADMAdapterUnityMapTableRemoveObjectForKey(_adapterDelegates, placementID);
   }
   [_currentShowingUnityDelegate unityAdsDidFinish:placementID withFinishState:state];
 }
 
--(void)unityAdsDidStart:(NSString *)placementID {
+- (void)unityAdsDidStart:(NSString *)placementID {
   [_currentShowingUnityDelegate unityAdsDidStart:placementID];
 }
 
--(void)unityAdsReady:(NSString *)placementID {
+- (void)unityAdsReady:(NSString *)placementID {
   id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
   @synchronized (_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementID];
   }
   NSLog(@"adapter delegate: %@", adapterDelegate);
 
-  if (adapterDelegate) {
+  if(adapterDelegate) {
     [adapterDelegate unityAdsReady:placementID];
   }
 
-  if (_isBannerLoading && [placementID isEqualToString:_bannerPlacementID]) {
+  if(_isBannerLoading && [placementID isEqualToString:_bannerPlacementID]) {
     [UnityAdsBanner setDelegate:self];
     [UnityAdsBanner loadBanner:_bannerPlacementID];
   }
@@ -374,12 +374,12 @@
   }
 }
 
--(void)unityAdsDidClick:(NSString *)placementID {
+- (void)unityAdsDidClick:(NSString *)placementID {
   [_currentShowingUnityDelegate unityAdsDidClick:placementID];
 }
 
--(void)unityAdsDidError:(UnityAdsError)error withMessage:(NSString *)message {
-  if (error == kUnityAdsErrorShowError) {
+- (void)unityAdsDidError:(UnityAdsError)error withMessage:(NSString *)message {
+  if(error == kUnityAdsErrorShowError) {
     [_currentShowingUnityDelegate unityAdsDidError:error withMessage:message];
     return;
   }
@@ -398,8 +398,8 @@
   }
 }
 
--(void)stopTrackingDelegate:
-        (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+- (void)stopTrackingDelegate:
+    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   GADMAdapterUnityMapTableRemoveObjectForKey(_adapterDelegates, [adapterDelegate getPlacementID]);
 }
 
