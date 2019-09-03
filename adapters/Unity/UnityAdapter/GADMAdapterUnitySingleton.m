@@ -300,7 +300,6 @@
 - (void)unityAdsPlacementStateChanged:(NSString *)placementId
                              oldState:(UnityAdsPlacementState)oldState
                              newState:(UnityAdsPlacementState)newState {
-  NSLog(@"PlacementStateChanged for placement %@ from old %ld to new %ld ", placementId, (long) oldState, (long) newState);
 
   if (newState != oldState) {
     @synchronized(_placementStates) {
@@ -311,9 +310,6 @@
   id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
   @synchronized(_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementId];
-  }
-  if ([placementId isEqualToString:@"video"]) {
-    NSLog(@"PlacementState for video %ld with delegate %@", newState, adapterDelegate);
   }
 
   if (adapterDelegate) {
@@ -359,7 +355,6 @@
   @synchronized(_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementID];
   }
-  NSLog(@"adapter delegate: %@", adapterDelegate);
 
   if (adapterDelegate) {
     [adapterDelegate unityAdsReady:placementID];
