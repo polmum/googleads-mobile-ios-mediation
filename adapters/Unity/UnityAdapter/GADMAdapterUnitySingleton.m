@@ -16,7 +16,7 @@
 #import "GADMAdapterUnityConstants.h"
 #import "GADMAdapterUnityUtils.h"
 
-@interface GADMAdapterUnitySingleton () <UnityAdsExtendedDelegate, UnityAdsBannerDelegate> {
+@interface GADMAdapterUnitySingleton ()<UnityAdsExtendedDelegate, UnityAdsBannerDelegate> {
 
   /// NSMapTable to hold all adapter delegates.
   NSMapTable *_adapterDelegates;
@@ -31,10 +31,10 @@
   int missedImpressionOrdinal;
 
   /// Connector from unity adapter to send Unity callbacks.
-  __weak id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> _currentShowingUnityDelegate;
+  __weak id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> _currentShowingUnityDelegate;
 
   /// Connector from unity adapter to send Banner callbacks
-  __weak id <GADMAdapterUnityDataProvider, UnityAdsBannerDelegate> _currentBannerDelegate;
+  __weak id<GADMAdapterUnityDataProvider, UnityAdsBannerDelegate> _currentBannerDelegate;
 }
 
 @end
@@ -77,7 +77,7 @@
 }
 
 - (void)addAdapterDelegate:
-    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+    (id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   @synchronized(_adapterDelegates) {
     [_adapterDelegates setObject:adapterDelegate forKey:[adapterDelegate getPlacementID]];
   }
@@ -86,7 +86,7 @@
 #pragma mark - Rewardbased video ad methods
 
 - (void)requestRewardedAdWithDelegate:
-    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+    (id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   NSString *gameID = [adapterDelegate getGameID];
   NSString *placementID = [adapterDelegate getPlacementID];
 
@@ -140,7 +140,7 @@
 
 - (void)presentRewardedAdForViewController:(UIViewController *)viewController
                                   delegate:
-                                      (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)
+                                      (id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)
                                       adapterDelegate {
   _currentShowingUnityDelegate = adapterDelegate;
 
@@ -160,7 +160,7 @@
 #pragma mark - Interstitial ad methods
 
 - (void)requestInterstitialAdWithDelegate:
-    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+    (id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   NSString *gameID = [adapterDelegate getGameID];
   NSString *placementID = [adapterDelegate getPlacementID];
 
@@ -215,7 +215,7 @@
 }
 
 - (void)presentInterstitialAdForViewController:(UIViewController *)viewController
-                                      delegate:(id <GADMAdapterUnityDataProvider,
+                                      delegate:(id<GADMAdapterUnityDataProvider,
                                       UnityAdsExtendedDelegate>)adapterDelegate {
   _currentShowingUnityDelegate = adapterDelegate;
 
@@ -235,7 +235,7 @@
 #pragma mark - Banner ad methods
 
 - (void)requestBannerAdWithGameID:(NSString *)gameID
-                         delegate:(id <GADMAdapterUnityDataProvider, UnityAdsBannerDelegate>)
+                         delegate:(id<GADMAdapterUnityDataProvider, UnityAdsBannerDelegate>)
                              adapterDelegate {
   if (![UnityAds isSupported]) {
     [adapterDelegate unityAdsBannerDidError:@"Unity Ads is not supported for this device."];
@@ -308,7 +308,7 @@
     }
   }
 
-  id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
+  id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
   @synchronized(_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementId];
   }
@@ -355,7 +355,7 @@
 }
 
 - (void)unityAdsReady:(NSString *)placementID {
-  id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
+  id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate> adapterDelegate;
   @synchronized(_adapterDelegates) {
     adapterDelegate = [_adapterDelegates objectForKey:placementID];
   }
@@ -389,7 +389,7 @@
     delegates = _adapterDelegates.objectEnumerator.allObjects;
   }
 
-  for (id <UnityAdsExtendedDelegate, UnityAdsExtendedDelegate> delegate in delegates) {
+  for (id<UnityAdsExtendedDelegate, UnityAdsExtendedDelegate> delegate in delegates) {
     [delegate unityAdsDidError:error withMessage:message];
   }
 
@@ -399,7 +399,7 @@
 }
 
 - (void)stopTrackingDelegate:
-    (id <GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
+    (id<GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate>)adapterDelegate {
   GADMAdapterUnityMapTableRemoveObjectForKey(_adapterDelegates, [adapterDelegate getPlacementID]);
 }
 
