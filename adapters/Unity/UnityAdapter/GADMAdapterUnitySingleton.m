@@ -315,7 +315,8 @@
   if (adapterDelegate) {
     switch (newState) {
       case kPlacementContentStateReady:
-        [adapterDelegate unityAdsReady:placementId];
+        // do nothing
+        // unityAdReady callback will handle this
         break;
       case kPlacementContentStateNoFill:
         [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads no fill for placement: %@", placementId]];
