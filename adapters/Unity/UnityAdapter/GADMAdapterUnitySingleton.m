@@ -111,19 +111,19 @@
     NSNumber *numberPlacementState = [_placementStates valueForKey:placementID];
     if (numberPlacementState) {
       switch ([numberPlacementState integerValue]) {
-        case kPlacementContentStateReady:
+        case kUnityAdsPlacementStateReady:
           [adapterDelegate unityAdsReady:placementID];
           break;
-        case kPlacementContentStateNoFill:
+        case kUnityAdsPlacementStateNoFill:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads nofill for placement: %@", placementID]];
           break;
-        case kPlacementContentStateWaiting:
+        case kUnityAdsPlacementStateWaiting:
           // wait for unityAdsReady callback
           break;
-        case kPlacementContentStateDisabled:
+        case kUnityAdsPlacementStateDisabled:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads disabled for placement: %@", placementID]];
           break;
-        case kPlacementContentStateNotAvailable:
+        case kUnityAdsPlacementStateNotAvailable:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads not available for placement: %@", placementID]];
           break;
         default:
@@ -185,19 +185,19 @@
     NSNumber *numberPlacementState = [_placementStates valueForKey:placementID];
     if (numberPlacementState) {
       switch ([numberPlacementState integerValue]) {
-        case kPlacementContentStateReady:
+        case kUnityAdsPlacementStateReady:
           [adapterDelegate unityAdsReady:placementID];
           break;
-        case kPlacementContentStateNoFill:
+        case kUnityAdsPlacementStateNoFill:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads no fill for placement: %@", placementID]];
           break;
-        case kPlacementContentStateWaiting:
+        case kUnityAdsPlacementStateWaiting:
           // wait for unityAdsReady callback
           break;
-        case kPlacementContentStateDisabled:
+        case kUnityAdsPlacementStateDisabled:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads disabled for placement: %@", placementID]];
           break;
-        case kPlacementContentStateNotAvailable:
+        case kUnityAdsPlacementStateNotAvailable:
           [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads not available for placement: %@", placementID]];
           break;
         default:
@@ -314,20 +314,20 @@
 
   if (adapterDelegate) {
     switch (newState) {
-      case kPlacementContentStateReady:
+      case kUnityAdsPlacementStateReady:
         // do nothing
         // unityAdReady callback will handle this
         break;
-      case kPlacementContentStateNoFill:
+      case kUnityAdsPlacementStateNoFill:
         [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads no fill for placement: %@", placementId]];
         break;
-      case kPlacementContentStateWaiting:
+      case kUnityAdsPlacementStateWaiting:
         // wait for unityAdsReady callback
         break;
-      case kPlacementContentStateDisabled:
+      case kUnityAdsPlacementStateDisabled:
         [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads disabled for placement: %@", placementId]];
         break;
-      case kPlacementContentStateNotAvailable:
+      case kUnityAdsPlacementStateNotAvailable:
         [adapterDelegate unityAdsDidError:kUnityAdsErrorInternalError withMessage:[NSString stringWithFormat:@"unity ads not available for placement: %@", placementId]];
         break;
       default:
