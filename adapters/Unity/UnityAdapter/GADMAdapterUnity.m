@@ -18,6 +18,7 @@
 #import "GADMAdapterUnitySingleton.h"
 #import "GADMediationAdapterUnity.h"
 #import "GADUnityError.h"
+#import "GADMAdapterUnityBannerAd.h"
 
 @interface GADMAdapterUnity () {
   /// Connector from Google Mobile Ads SDK to receive ad configurations.
@@ -28,6 +29,9 @@
 
   /// Placement ID of Unity Ads network.
   NSString *_placementID;
+
+  /// Unity Ads Banner wrapper
+  GADMAdapterUnityBannerAd *_bannerAd;
 
   /// YES if the adapter is loading.
   BOOL _isLoading;
@@ -51,6 +55,7 @@
 
 - (void)stopBeingDelegate {
   [[GADMAdapterUnitySingleton sharedInstance] stopTrackingDelegate:self];
+  [_bannerAd stopBeingDelegate];
 }
 
 #pragma mark Interstitial Methods
@@ -87,6 +92,22 @@
   [[GADMAdapterUnitySingleton sharedInstance]
       presentInterstitialAdForViewController:rootViewController
                                     delegate:self];
+}
+
+#pragma mark Banner Methods
+
+- (void)getBannerWithSize:(GADAdSize)adSize {
+  id<GADMAdNetworkConnector> strongConnector = _networkConnector;
+
+  _placementID = [[[strongConnector credentials] objectForKey:kGADMAdapterUnityPlacementID] copy];
+  if (!_placementID) {
+    NSError *error = GADUnityErrorWithDescription(@"Game ID and Placement ID cannot be nil.");
+    [strongConnector adapter:self didFailAd:error];
+    return;
+  }
+
+  _bannerAd = [[GADMAdapterUnityBannerAd alloc] initWithGADMAdNetworkConnector:_networkConnector adapter:self];
+  [_bannerAd getBannerWithSize:adSize];
 }
 
 #pragma mark GADMAdapterUnityDataProvider Methods
