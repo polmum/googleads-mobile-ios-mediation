@@ -18,7 +18,7 @@
 #import "GADMAdapterUnitySingleton.h"
 #import "GADMAdapterUnityProtocol.h"
 
-@interface GADMAdapterUnityBannerAd : NSObject <UADSBannerAdViewDelegate>
+@interface GADMAdapterUnityBannerAd : NSObject <UADSBannerViewDelegate>
 
 /// Initializes a new instance with |connector| and |adapter|.
 - (nonnull instancetype)initWithGADMAdNetworkConnector:(nonnull id<GADMAdNetworkConnector>)connector
