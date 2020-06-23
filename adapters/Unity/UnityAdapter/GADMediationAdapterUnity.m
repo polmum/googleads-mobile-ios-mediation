@@ -17,12 +17,11 @@
 #import "GADMAdapterUnityRewardedAd.h"
 #import "GADMAdapterUnityUtils.h"
 #import "GADMAdapterUnity.h"
+#import "GADMUnityInitializationDelegate.h"
 @import UnityAds;
 
 @interface GADMediationAdapterUnity ()
-
 @property(nonatomic, strong) GADMAdapterUnityRewardedAd *rewardedAd;
-
 @end
 
 @implementation GADMediationAdapterUnity
@@ -51,8 +50,9 @@
               gameIDs);
         NSLog(@"Initializing Unity Ads SDK with the game ID %@.", gameID);
     }
-    
-    [[GADMAdapterUnity alloc] initializeWithGameID:gameID];
+    [UnityAds setDebugMode:true];
+    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:completionHandler];
+    [[GADMAdapterUnity alloc] initializeWithGameID:gameID withInitDelegate:initializationDelegate];
     completionHandler(nil);
 }
 
@@ -89,6 +89,7 @@
 - (void)loadRewardedAdForAdConfiguration:(GADMediationRewardedAdConfiguration *)adConfiguration
                        completionHandler:
 (GADMediationRewardedLoadCompletionHandler)completionHandler {
+    
     self.rewardedAd = [[GADMAdapterUnityRewardedAd alloc] initWithAdConfiguration:adConfiguration
                                                                 completionHandler:completionHandler];
     [self.rewardedAd requestRewardedAd];

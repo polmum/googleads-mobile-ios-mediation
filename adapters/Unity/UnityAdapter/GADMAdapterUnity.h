@@ -15,6 +15,7 @@
 @import Foundation;
 @import GoogleMobileAds;
 @import UnityAds;
+#import "GADMUnityInitializationDelegate.h"
 
 #import "GADMAdapterUnityProtocol.h"
 
@@ -24,6 +25,6 @@
 @interface GADMAdapterUnity
     : NSObject <GADMAdNetworkAdapter, GADMAdapterUnityDataProvider, UnityAdsExtendedDelegate, UnityAdsInitializationDelegate>
 
-- (void)initializeWithGameID:(NSString *)gameID;
+- (void)initializeWithGameID:(NSString *)gameID withInitDelegate:(GADMUnityInitializationDelegate *)initDelegate;
 
 @end

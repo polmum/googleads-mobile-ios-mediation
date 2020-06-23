@@ -37,6 +37,7 @@
 }
 
 - (void)getInterstitial {
+    // This method loads interstitial Ads for a given _placementID
     id<GADMAdNetworkConnector> strongConnector = _connector;
     id<GADMAdNetworkAdapter> strongAdapter = _adapter;
     if (!strongConnector || !strongAdapter) {
@@ -55,6 +56,7 @@
 }
 
 - (void)presentInterstitialFromRootViewController:(UIViewController *)rootViewController {
+    //This method shows the Ad and is followed by unityAdsDidFinish callback when the Ad is finished.
   // We will send adapterWillPresentInterstitial callback before presenting unity ad because the ad
   // has already loaded.
     id<GADMAdNetworkConnector> strongConnector = _connector;
@@ -93,6 +95,7 @@
 }
 
 - (void)unityAdsDidFinish:(NSString *)placementID withFinishState:(UnityAdsFinishState)state {
+    // Called when the Ad s finished showing.
     id<GADMAdNetworkConnector> strongNetworkConnector = _connector;
     id<GADMAdNetworkAdapter> strongAdapter = _adapter;
     if (strongNetworkConnector && strongAdapter) {
@@ -102,25 +105,26 @@
 }
 
 - (void)unityAdsDidClick:(NSString *)placementID {
-    id<GADMAdNetworkConnector> strongNetworkConnector = _connector;
-    id<GADMAdNetworkAdapter> strongAdapter = _adapter;
+    // Called when user clicks on the Ad.
       // The Unity Ads SDK doesn't provide an event for leaving the application, so the adapter assumes
       // that a click event indicates the user is leaving the application for a browser or deeplink, and
       // notifies the Google Mobile Ads SDK accordingly.
-    if (strongNetworkConnector) {
+    id<GADMAdNetworkConnector> strongNetworkConnector = _connector;
+    id<GADMAdNetworkAdapter> strongAdapter = _adapter;
+    if (strongNetworkConnector && strongAdapter) {
         [strongNetworkConnector adapterDidGetAdClick:strongAdapter];
         [strongNetworkConnector adapterWillLeaveApplication:strongAdapter];
     }
 }
 
 - (void)unityAdsDidError:(UnityAdsError)error withMessage:(NSString *)message {
+    // Unity Ads show error will only happen after the ad has been loaded. So, we will send
+    // dismiss/close callbacks.
     id<GADMAdNetworkConnector> strongNetworkConnector = _connector;
     id<GADMAdNetworkAdapter> strongAdapter = _adapter;
     if (!_isLoading) {
-        // Unity Ads show error will only happen after the ad has been loaded. So, we will send
-        // dismiss/close callbacks.
         if (error == kUnityAdsErrorShowError) {
-            if (strongNetworkConnector) {
+            if (strongNetworkConnector && strongAdapter) {
                 [strongNetworkConnector adapterWillDismissInterstitial:strongAdapter];
                 [strongNetworkConnector adapterDidDismissInterstitial:strongAdapter];
             }
@@ -147,6 +151,7 @@
 // UnityAdsLoadDelegate methods
 
 - (void)unityAdsAdFailedToLoad:(nonnull NSString *)placementId {
+    //called when the Ad is failed to load the Ad.
     id<GADMAdNetworkConnector> strongConnector = _connector;
     id<GADMAdNetworkAdapter> strongAdapter = _adapter;
     if (strongConnector && strongAdapter) {
@@ -156,6 +161,7 @@
 }
 
 - (void)unityAdsAdLoaded:(nonnull NSString *)placementId {
+    //called when the Ad is loaded successfully.
     id<GADMAdNetworkConnector> strongNetworkConnector = _connector;
     id<GADMAdNetworkAdapter> strongAdapter = _adapter;
     if (!_isLoading) {

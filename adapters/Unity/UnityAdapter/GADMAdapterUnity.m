@@ -37,6 +37,7 @@
     GADMUnityInterstitialAd *_interstitialAd;
         
 }
+@property (nonatomic, copy) InitCompletionHandler completionHandler;
 
 @end
 
@@ -60,7 +61,7 @@
     }
 }
 
-- (void)initializeWithGameID:(NSString *)gameID {
+- (void)initializeWithGameID:(NSString *)gameID withInitDelegate:(id)initDelegate{
     if ([UnityAds isInitialized]) {
         return;
     }
@@ -68,11 +69,13 @@
     GADMUnityConfigureMediationService();
     // Initializing Unity Ads with |gameID|.
 //    [UnityAds initialize:gameID testMode:NO enablePerPlacementLoad:YES];
+    if (!initDelegate) {
+        return;
+    }
+    
     [UnityAds initialize:gameID testMode:NO enablePerPlacementLoad:YES initializationDelegate:self];
     [UnityAds addDelegate:self];
 }
-
-#pragma mark Interstitial Methods
 
 - (instancetype)initWithGADMAdNetworkConnector:(id<GADMAdNetworkConnector>)connector {
     if (!connector) {
@@ -83,12 +86,18 @@
     return self;
 }
 
+#pragma mark Interstitial Methods
+
 - (void)getInterstitial {
     id<GADMAdNetworkConnector> strongConnector = _networkConnector;
     _gameID = [[[strongConnector credentials] objectForKey:kGADMAdapterUnityGameID] copy];
-    _interstitialAd = [[GADMUnityInterstitialAd alloc] initWithGADMAdNetworkConnector:strongConnector adapter:self];
-    [self initializeWithGameID:_gameID];
-    [_interstitialAd getInterstitial];
+    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:_completionHandler];
+    [self initializeWithGameID:_gameID withInitDelegate:initializationDelegate];
+    if (_completionHandler) {
+        _interstitialAd = [[GADMUnityInterstitialAd alloc] initWithGADMAdNetworkConnector:strongConnector adapter:self];
+        [_interstitialAd getInterstitial];
+    }
+    
 }
 
 - (void)presentInterstitialFromRootViewController:(UIViewController *)rootViewController {
@@ -116,7 +125,7 @@
     
     _bannerAd = [[GADMAdapterUnityBannerAd alloc] initWithGADMAdNetworkConnector:strongConnector
                                                                          adapter:self];
-    [self initializeWithGameID:_gameID];
+//    [self initializeWithGameID:_gameID];
     [_bannerAd loadBannerWithSize:adSize];
 }
 
