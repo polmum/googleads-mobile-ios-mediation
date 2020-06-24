@@ -53,7 +53,7 @@
     [UnityAds setDebugMode:true];
     GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:completionHandler];
     [[GADMAdapterUnity alloc] initializeWithGameID:gameID withInitDelegate:initializationDelegate];
-    completionHandler(nil);
+    
 }
 
 + (GADVersionNumber)adSDKVersion {

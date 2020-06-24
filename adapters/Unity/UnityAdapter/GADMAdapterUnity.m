@@ -37,7 +37,7 @@
     GADMUnityInterstitialAd *_interstitialAd;
         
 }
-@property (nonatomic, copy) InitCompletionHandler completionHandler;
+@property (nonatomic, strong) GADMediationAdapterSetUpCompletionBlock completionHandler;
 
 @end
 
@@ -73,7 +73,7 @@
         return;
     }
     
-    [UnityAds initialize:gameID testMode:NO enablePerPlacementLoad:YES initializationDelegate:self];
+    [UnityAds initialize:gameID testMode:NO enablePerPlacementLoad:YES initializationDelegate:initDelegate];
     [UnityAds addDelegate:self];
 }
 
@@ -91,13 +91,16 @@
 - (void)getInterstitial {
     id<GADMAdNetworkConnector> strongConnector = _networkConnector;
     _gameID = [[[strongConnector credentials] objectForKey:kGADMAdapterUnityGameID] copy];
-    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:_completionHandler];
-    [self initializeWithGameID:_gameID withInitDelegate:initializationDelegate];
-    if (_completionHandler) {
-        _interstitialAd = [[GADMUnityInterstitialAd alloc] initWithGADMAdNetworkConnector:strongConnector adapter:self];
-        [_interstitialAd getInterstitial];
-    }
     
+    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:_completionHandler];
+    
+    [self initializeWithGameID:_gameID withInitDelegate:initializationDelegate];
+    _interstitialAd = [[GADMUnityInterstitialAd alloc] initWithGADMAdNetworkConnector:strongConnector adapter:self];
+    [_interstitialAd getInterstitial];
+}
+
+-(void) setInitializationComplete:(GADMediationAdapterSetUpCompletionBlock)handler {
+    NSLog(@"Init completion handler %@", handler);
 }
 
 - (void)presentInterstitialFromRootViewController:(UIViewController *)rootViewController {

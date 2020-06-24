@@ -10,14 +10,21 @@
 @import GoogleMobileAds;
 @import UnityAds;
 
+@protocol InitCompletionDelegate <NSObject>
 
-typedef void(^InitCompletionHandler)(NSError *_Nullable error);
+@optional
+-(void)setInitializationComplete:(GADMediationAdapterSetUpCompletionBlock)handler;
+
+@end
+
+typedef void(^GADMediationAdapterSetUpCompletionBlock)(NSError *_Nullable error);
 
 
 @interface GADMUnityInitializationDelegate : NSObject
-@property (nonatomic, copy) InitCompletionHandler _Nonnull handler;
+@property (nonatomic, strong) GADMediationAdapterSetUpCompletionBlock _Nonnull handler;
 
-- (id)initializeWithCompletionHandler:(InitCompletionHandler)completionHandler;
+
+- (id)initializeWithCompletionHandler:(GADMediationAdapterSetUpCompletionBlock)completionHandler;
 
 @end
 
