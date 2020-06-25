@@ -51,7 +51,7 @@
         NSLog(@"Initializing Unity Ads SDK with the game ID %@.", gameID);
     }
     [UnityAds setDebugMode:true];
-    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:completionHandler];
+    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:&completionHandler];
     [[GADMAdapterUnity alloc] initializeWithGameID:gameID withInitDelegate:initializationDelegate];
     
 }

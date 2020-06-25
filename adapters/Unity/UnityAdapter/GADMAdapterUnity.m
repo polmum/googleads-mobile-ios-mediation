@@ -92,9 +92,7 @@
     id<GADMAdNetworkConnector> strongConnector = _networkConnector;
     _gameID = [[[strongConnector credentials] objectForKey:kGADMAdapterUnityGameID] copy];
     
-    GADMUnityInitializationDelegate* initializationDelegate = [[GADMUnityInitializationDelegate alloc] initializeWithCompletionHandler:_completionHandler];
-    
-    [self initializeWithGameID:_gameID withInitDelegate:initializationDelegate];
+//    [self initializeWithGameID:_gameID];
     _interstitialAd = [[GADMUnityInterstitialAd alloc] initWithGADMAdNetworkConnector:strongConnector adapter:self];
     [_interstitialAd getInterstitial];
 }
